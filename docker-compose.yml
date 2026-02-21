@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  agentvault:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - agentvault_data:/data
+      - ./agentvault:/app/agentvault
+    environment:
+      - AGENTVAULT_DB_PATH=/data/memories.db
+      - AGENTVAULT_CHROMA_PATH=/data/chroma
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  agentvault_data:
+    driver: local
