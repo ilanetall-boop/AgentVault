@@ -303,6 +303,25 @@ class SQLiteStructuredStore:
             result = await session.execute(stmt)
             return [_row_to_memory(row) for row in result.scalars().all()]
 
+    async def list_agents(self) -> list[dict]:
+        """List all distinct agent IDs with memory counts."""
+        async with self._get_session() as session:
+            from sqlalchemy import func
+
+            stmt = (
+                select(
+                    MemoryRow.agent_id,
+                    func.count().label("memory_count"),
+                )
+                .group_by(MemoryRow.agent_id)
+                .order_by(func.count().desc())
+            )
+            result = await session.execute(stmt)
+            return [
+                {"agent_id": row.agent_id, "memory_count": row.memory_count}
+                for row in result.all()
+            ]
+
     async def close(self) -> None:
         """Close the database connection."""
         if self._engine:

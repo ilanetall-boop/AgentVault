@@ -12,6 +12,14 @@ from agentvault.core.types import MemoryType
 router = APIRouter()
 
 
+@router.get("/agents")
+async def list_agents() -> dict:
+    """List all agents that have stored memories."""
+    manager = get_manager()
+    agents = await manager._store.list_agents()
+    return {"agents": agents}
+
+
 @router.get("/agents/{agent_id}/memories")
 async def list_agent_memories(
     agent_id: str,

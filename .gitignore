@@ -164,7 +164,18 @@ Thumbs.db
 *.faiss
 *.index
 *.meta.json
+*.npy
 
 # Local data directories
 .agentvault/
+agentvault_data/
 data/
+
+# Ruff
+.ruff_cache/
+
+# Claude Code
+.claude/
+
+# Local prompt files
+prompt-*.md

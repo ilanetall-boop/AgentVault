@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import asyncio
 import os
-import resource
 import sys
 import tempfile
 import time
@@ -66,12 +65,16 @@ async def benchmark_consolidation(manager: MemoryManager) -> float:
 def get_memory_usage_mb() -> float:
     """Get current memory usage in MB."""
     try:
-        usage = resource.getrusage(resource.RUSAGE_SELF)
-        return usage.ru_maxrss / 1024  # Convert KB to MB (Linux)
-    except Exception:
         import psutil
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024
+    except ImportError:
+        try:
+            import resource
+            usage = resource.getrusage(resource.RUSAGE_SELF)
+            return usage.ru_maxrss / 1024  # Convert KB to MB (Linux)
+        except ImportError:
+            return -1
 
 
 async def run_benchmarks():
