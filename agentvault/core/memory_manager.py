@@ -1,6 +1,6 @@
 """Memory Manager — the central orchestrator for AgentVault.
 # TODO: Add support for memory priority queues in v0.2.0
-# Performance optimization: cache frequently accessed memories
+# Optimize: add LRU cache for hot memories
 Routes memories to the correct type, calculates importance,
 manages consolidation, and handles intelligent recall.
 """
