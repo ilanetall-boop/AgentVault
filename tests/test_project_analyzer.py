@@ -347,7 +347,7 @@ def format_context_block(analysis: dict) -> str:
 
 # --- Run tests -------------------------------------------------------
 
-def test_project(name: str, root: str) -> bool:
+def run_project_check(name: str, root: str) -> bool:
     print(f"\n{'-'*60}")
     print(f"TEST: {name}")
     print(f"Path: {root}")
@@ -413,22 +413,22 @@ if __name__ == "__main__":
         node_dir = os.path.join(tmpdir, "my-react-app")
         os.makedirs(node_dir, exist_ok=True)
         create_node_react_project(node_dir)
-        ok1 = test_project("Node.js/React", node_dir)
+        ok1 = run_project_check("Node.js/React", node_dir)
 
         # Test 2: Python/Django
         django_dir = os.path.join(tmpdir, "mydjango")
         os.makedirs(django_dir, exist_ok=True)
         create_python_django_project(django_dir)
-        ok2 = test_project("Python/Django", django_dir)
+        ok2 = run_project_check("Python/Django", django_dir)
 
         # Test 3: Empty project
         empty_dir = os.path.join(tmpdir, "empty-project")
         os.makedirs(empty_dir, exist_ok=True)
-        ok3 = test_project("Empty project", empty_dir)
+        ok3 = run_project_check("Empty project", empty_dir)
 
         # Test 4: AgentVault itself
         agentvault_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        ok4 = test_project("AgentVault (real project)", agentvault_root)
+        ok4 = run_project_check("AgentVault (real project)", agentvault_root)
 
         # Summary
         print(f"\n{'='*60}")
