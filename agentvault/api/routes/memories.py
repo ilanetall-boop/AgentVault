@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from agentvault.api.dependencies import get_manager
 from agentvault.core.types import MemoryType
@@ -18,11 +18,11 @@ class CreateMemoryRequest(BaseModel):
 
     agent_id: str
     content: str
-    type: Optional[str] = None
-    importance: Optional[float] = None
+    type: str | None = None
+    importance: float | None = None
     tags: list[str] = []
     metadata: dict[str, Any] = {}
-    source: Optional[str] = None
+    source: str | None = None
 
 
 class MemoryResponse(BaseModel):
@@ -36,7 +36,7 @@ class MemoryResponse(BaseModel):
     tags: list[str]
     access_count: int
     created_at: str
-    source: Optional[str] = None
+    source: str | None = None
 
 
 @router.post("/memories", status_code=201)
@@ -44,7 +44,7 @@ async def create_memory(request: CreateMemoryRequest) -> dict:
     """Create a new memory."""
     manager = get_manager()
 
-    memory_type: Optional[MemoryType] = None
+    memory_type: MemoryType | None = None
     if request.type:
         memory_type = MemoryType(request.type)
 

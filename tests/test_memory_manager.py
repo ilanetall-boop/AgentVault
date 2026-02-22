@@ -4,7 +4,6 @@ import pytest
 
 from agentvault.core.types import MemoryType
 
-
 AGENT_ID = "test-agent"
 
 

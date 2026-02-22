@@ -91,7 +91,7 @@ class Ranker:
 
         scored = [
             (memory, self.score(memory, sim))
-            for memory, sim in zip(memories, similarities)
+            for memory, sim in zip(memories, similarities, strict=False)
         ]
         scored.sort(key=lambda x: x[1], reverse=True)
         return scored[:top_k]

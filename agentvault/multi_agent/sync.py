@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,8 @@ class MemoryEvent:
         event_type: str,
         namespace_id: str,
         agent_id: str,
-        memory_id: Optional[str] = None,
-        data: Optional[dict[str, Any]] = None,
+        memory_id: str | None = None,
+        data: dict[str, Any] | None = None,
     ) -> None:
         self.event_type = event_type
         self.namespace_id = namespace_id
@@ -77,7 +77,7 @@ class SyncManager:
     async def publish(
         self,
         event: MemoryEvent,
-        target_agents: Optional[list[str]] = None,
+        target_agents: list[str] | None = None,
     ) -> None:
         """Publish a memory event to subscribed agents.
 
@@ -104,7 +104,7 @@ class SyncManager:
         self,
         agent_id: str,
         timeout: float = 0.1,
-    ) -> Optional[MemoryEvent]:
+    ) -> MemoryEvent | None:
         """Poll for new events for an agent (non-blocking).
 
         Args:
@@ -119,7 +119,7 @@ class SyncManager:
             return None
         try:
             return await asyncio.wait_for(queue.get(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return None
 
     async def drain(self, agent_id: str) -> list[MemoryEvent]:
@@ -145,8 +145,8 @@ class SyncManager:
 
     def get_history(
         self,
-        namespace_id: Optional[str] = None,
-        memory_id: Optional[str] = None,
+        namespace_id: str | None = None,
+        memory_id: str | None = None,
         limit: int = 100,
     ) -> list[MemoryEvent]:
         """Get event history for conflict resolution.
@@ -170,7 +170,7 @@ class SyncManager:
         self,
         memory_id: str,
         namespace_id: str,
-    ) -> Optional[MemoryEvent]:
+    ) -> MemoryEvent | None:
         """Resolve a conflict using last-write-wins strategy.
 
         Args:

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import abc
-from typing import Optional
 
 from agentvault.core.types import Memory, MemoryQuery, MemoryType
 
@@ -24,7 +23,7 @@ class BaseVectorStore(abc.ABC):
         self,
         query_embedding: list[float],
         top_k: int = 10,
-        filters: Optional[dict] = None,
+        filters: dict | None = None,
     ) -> list[tuple[str, float]]:
         """Search for similar vectors. Returns list of (memory_id, score)."""
 
@@ -53,15 +52,15 @@ class BaseStructuredStore(abc.ABC):
         """Save a memory to the store."""
 
     @abc.abstractmethod
-    async def get_memory(self, memory_id: str) -> Optional[Memory]:
+    async def get_memory(self, memory_id: str) -> Memory | None:
         """Retrieve a single memory by ID."""
 
     @abc.abstractmethod
     async def get_memories(
         self,
         agent_id: str,
-        memory_type: Optional[MemoryType] = None,
-        tags: Optional[list[str]] = None,
+        memory_type: MemoryType | None = None,
+        tags: list[str] | None = None,
         min_importance: float = 0.0,
         limit: int = 100,
         offset: int = 0,
@@ -80,8 +79,8 @@ class BaseStructuredStore(abc.ABC):
     async def delete_memories(
         self,
         agent_id: str,
-        older_than: Optional[str] = None,
-        importance_below: Optional[float] = None,
+        older_than: str | None = None,
+        importance_below: float | None = None,
     ) -> int:
         """Delete memories matching criteria. Returns count deleted."""
 
@@ -89,7 +88,7 @@ class BaseStructuredStore(abc.ABC):
     async def count_memories(
         self,
         agent_id: str,
-        memory_type: Optional[MemoryType] = None,
+        memory_type: MemoryType | None = None,
     ) -> int:
         """Count memories matching criteria."""
 

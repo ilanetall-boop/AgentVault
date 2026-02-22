@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from enum import Enum
-from typing import Any, Optional
+from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class MemoryType(str, Enum):
+class MemoryType(StrEnum):
     """Types of memory supported by AgentVault."""
 
     EPISODIC = "episodic"
@@ -30,14 +30,14 @@ class Memory(BaseModel):
     type: MemoryType
     content: str
     metadata: dict[str, Any] = {}
-    embedding: Optional[list[float]] = None
+    embedding: list[float] | None = None
     importance: float = Field(default=0.5, ge=0.0, le=1.0)
     access_count: int = 0
     created_at: datetime = Field(default_factory=datetime.utcnow)
     last_accessed: datetime = Field(default_factory=datetime.utcnow)
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
     tags: list[str] = []
-    source: Optional[str] = None
+    source: str | None = None
     related_memories: list[str] = []
 
 
@@ -48,7 +48,7 @@ class EpisodicMemory(Memory):
     """
 
     type: MemoryType = MemoryType.EPISODIC
-    event: Optional[str] = None
+    event: str | None = None
     context: dict[str, Any] = {}
     participants: list[str] = []
 
@@ -60,9 +60,9 @@ class SemanticMemory(Memory):
     """
 
     type: MemoryType = MemoryType.SEMANTIC
-    subject: Optional[str] = None
-    predicate: Optional[str] = None
-    obj: Optional[str] = None
+    subject: str | None = None
+    predicate: str | None = None
+    obj: str | None = None
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
@@ -73,9 +73,9 @@ class ProceduralMemory(Memory):
     """
 
     type: MemoryType = MemoryType.PROCEDURAL
-    name: Optional[str] = None
+    name: str | None = None
     steps: list[str] = []
-    learned_from: Optional[str] = None
+    learned_from: str | None = None
     success_count: int = 0
     failure_count: int = 0
 
@@ -92,7 +92,7 @@ class MemoryQuery(BaseModel):
     ]
     top_k: int = Field(default=10, ge=1, le=100)
     min_importance: float = Field(default=0.0, ge=0.0, le=1.0)
-    time_range: Optional[tuple[datetime, datetime]] = None
+    time_range: tuple[datetime, datetime] | None = None
     tags: list[str] = []
     include_shared: bool = True
 
@@ -117,7 +117,7 @@ class ConsolidationResult(BaseModel):
     duration_ms: float = 0.0
 
 
-class AgentPermission(str, Enum):
+class AgentPermission(StrEnum):
     """Permission levels for multi-agent memory access."""
 
     READ = "read"

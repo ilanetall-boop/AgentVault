@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -19,7 +17,7 @@ class SearchRequest(BaseModel):
     agent_id: str
     query: str
     top_k: int = 10
-    types: Optional[list[str]] = None
+    types: list[str] | None = None
     min_importance: float = 0.0
     tags: list[str] = []
 
@@ -29,7 +27,7 @@ async def search_memories(request: SearchRequest) -> dict:
     """Search for relevant memories."""
     manager = get_manager()
 
-    memory_types: Optional[list[MemoryType]] = None
+    memory_types: list[MemoryType] | None = None
     if request.types:
         memory_types = [MemoryType(t) for t in request.types]
 
@@ -54,7 +52,7 @@ async def search_memories(request: SearchRequest) -> dict:
                 "relevance_score": score,
                 "created_at": m.created_at.isoformat(),
             }
-            for m, score in zip(result.memories, result.relevance_scores)
+            for m, score in zip(result.memories, result.relevance_scores, strict=False)
         ],
         "total_found": result.total_found,
         "query_time_ms": result.query_time_ms,

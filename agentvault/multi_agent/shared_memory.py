@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from agentvault.core.memory_manager import MemoryManager
 from agentvault.core.types import (
     AgentPermission,
-    Memory,
-    MemoryType,
     RecallResult,
     SharedNamespace,
 )
@@ -42,7 +40,7 @@ class SharedMemoryManager:
         self,
         name: str,
         owner_agent_id: str,
-        member_agents: Optional[dict[str, str]] = None,
+        member_agents: dict[str, str] | None = None,
     ) -> SharedNamespace:
         """Create a new shared namespace.
 
@@ -173,7 +171,7 @@ class SharedMemoryManager:
         # Filter to only shared memories in this namespace
         shared_memories = []
         shared_scores = []
-        for mem, score in zip(result.memories, result.relevance_scores):
+        for mem, score in zip(result.memories, result.relevance_scores, strict=False):
             ns_list = mem.metadata.get("shared_namespaces", [])
             if namespace_id in ns_list:
                 shared_memories.append(mem)
@@ -269,7 +267,7 @@ class SharedMemoryManager:
                     "Listener error for namespace %s", namespace_id, exc_info=True
                 )
 
-    def get_namespace(self, namespace_id: str) -> Optional[SharedNamespace]:
+    def get_namespace(self, namespace_id: str) -> SharedNamespace | None:
         """Get a namespace by ID."""
         return self._namespaces.get(namespace_id)
 

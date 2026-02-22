@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from agentvault.core.types import Memory, MemoryType
+from agentvault.core.types import MemoryType
 from tests.conftest import make_memory
 
 

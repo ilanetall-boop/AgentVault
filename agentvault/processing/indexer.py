@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 import numpy as np
 
@@ -44,13 +43,13 @@ class Indexer:
         self,
         model_name: str = "all-MiniLM-L6-v2",
         use_openai: bool = False,
-        openai_api_key: Optional[str] = None,
+        openai_api_key: str | None = None,
     ) -> None:
         self._model_name = model_name
         self._use_openai = use_openai
         self._openai_api_key = openai_api_key
         self._local_model = None
-        self._embedding_dim: Optional[int] = None
+        self._embedding_dim: int | None = None
 
     async def initialize(self) -> None:
         """Initialize the embedding model."""
@@ -152,11 +151,11 @@ class Indexer:
                 input=text,
             )
             return response.data[0].embedding
-        except ImportError:
+        except ImportError as err:
             raise RuntimeError(
                 "openai package not installed. "
                 "Install with: pip install agentvault[openai]"
-            )
+            ) from err
 
     @staticmethod
     def cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:

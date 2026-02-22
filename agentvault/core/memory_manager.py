@@ -8,8 +8,7 @@ manages consolidation, and handles intelligent recall.
 from __future__ import annotations
 
 import logging
-from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from agentvault.core.episodic import EpisodicMemoryManager
 from agentvault.core.procedural import ProceduralMemoryManager
@@ -46,14 +45,14 @@ class MemoryManager:
 
     def __init__(
         self,
-        store: Optional[HybridStore] = None,
-        indexer: Optional[Indexer] = None,
-        ranker: Optional[Ranker] = None,
-        consolidator: Optional[Consolidator] = None,
-        extractor: Optional[Extractor] = None,
-        db_path: Optional[str] = None,
-        faiss_path: Optional[str] = None,
-        chroma_path: Optional[str] = None,  # Backwards compatibility alias
+        store: HybridStore | None = None,
+        indexer: Indexer | None = None,
+        ranker: Ranker | None = None,
+        consolidator: Consolidator | None = None,
+        extractor: Extractor | None = None,
+        db_path: str | None = None,
+        faiss_path: str | None = None,
+        chroma_path: str | None = None,  # Backwards compatibility alias
         consolidation_threshold: int = DEFAULT_CONSOLIDATION_THRESHOLD,
     ) -> None:
         self._indexer = indexer or Indexer()
@@ -85,11 +84,11 @@ class MemoryManager:
         self,
         agent_id: str,
         content: str,
-        memory_type: Optional[MemoryType | str] = None,
-        importance: Optional[float] = None,
-        tags: Optional[list[str]] = None,
-        metadata: Optional[dict[str, Any]] = None,
-        source: Optional[str] = None,
+        memory_type: MemoryType | str | None = None,
+        importance: float | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+        source: str | None = None,
     ) -> Memory:
         """Store a new memory. The primary write interface.
 
@@ -172,10 +171,10 @@ class MemoryManager:
         self,
         agent_id: str,
         event: str,
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
         importance: float = 0.5,
-        tags: Optional[list[str]] = None,
-        source: Optional[str] = None,
+        tags: list[str] | None = None,
+        source: str | None = None,
     ) -> Memory:
         """Convenience method to store an episodic memory.
 
@@ -205,8 +204,8 @@ class MemoryManager:
         agent_id: str,
         content: str,
         importance: float = 0.6,
-        tags: Optional[list[str]] = None,
-        source: Optional[str] = None,
+        tags: list[str] | None = None,
+        source: str | None = None,
     ) -> Memory:
         """Convenience method to store a semantic (fact) memory.
 
@@ -234,10 +233,10 @@ class MemoryManager:
         agent_id: str,
         name: str,
         steps: list[str],
-        content: Optional[str] = None,
-        learned_from: Optional[str] = None,
+        content: str | None = None,
+        learned_from: str | None = None,
         importance: float = 0.6,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> Memory:
         """Convenience method to store a procedural memory.
 
@@ -269,9 +268,9 @@ class MemoryManager:
         agent_id: str,
         query: str,
         top_k: int = 10,
-        types: Optional[list[MemoryType]] = None,
+        types: list[MemoryType] | None = None,
         min_importance: float = 0.0,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
         include_shared: bool = True,
     ) -> RecallResult:
         """Recall relevant memories. The primary read interface.
@@ -324,7 +323,7 @@ class MemoryManager:
 
         return result
 
-    async def get_memory(self, memory_id: str) -> Optional[Memory]:
+    async def get_memory(self, memory_id: str) -> Memory | None:
         """Retrieve a single memory by ID.
 
         Args:
@@ -339,8 +338,8 @@ class MemoryManager:
     async def forget(
         self,
         agent_id: str,
-        older_than: Optional[str] = None,
-        importance_below: Optional[float] = None,
+        older_than: str | None = None,
+        importance_below: float | None = None,
     ) -> int:
         """Forget (delete) memories matching criteria.
 
@@ -397,7 +396,7 @@ class MemoryManager:
     async def count(
         self,
         agent_id: str,
-        memory_type: Optional[MemoryType] = None,
+        memory_type: MemoryType | None = None,
     ) -> int:
         """Count memories for an agent.
 
@@ -424,7 +423,7 @@ class MemoryManager:
         importance: float,
         tags: list[str],
         metadata: dict[str, Any],
-        source: Optional[str],
+        source: str | None,
         extraction: dict[str, Any],
     ) -> Memory:
         """Create a memory of the appropriate type."""

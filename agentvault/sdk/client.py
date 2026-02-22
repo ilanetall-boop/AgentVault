@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from agentvault.core.memory_manager import MemoryManager
 from agentvault.core.types import (
@@ -59,9 +59,9 @@ class AgentVault:
     def __init__(
         self,
         agent_id: str = "default",
-        db_path: Optional[str] = None,
-        faiss_path: Optional[str] = None,
-        chroma_path: Optional[str] = None,  # Backwards compatibility alias
+        db_path: str | None = None,
+        faiss_path: str | None = None,
+        chroma_path: str | None = None,  # Backwards compatibility alias
         auto_initialize: bool = True,
     ) -> None:
         """Initialize AgentVault.
@@ -87,7 +87,8 @@ class AgentVault:
                 self._initialized = True
             else:
                 raise RuntimeError(
-                    "AgentVault not initialized. Call initialize() first or set auto_initialize=True."
+                    "AgentVault not initialized. "
+                    "Call initialize() first or set auto_initialize=True."
                 )
 
     # --- Initialization ---
@@ -107,11 +108,11 @@ class AgentVault:
     def remember(
         self,
         content: str,
-        type: Optional[str | MemoryType] = None,
-        importance: Optional[float] = None,
-        tags: Optional[list[str]] = None,
-        metadata: Optional[dict[str, Any]] = None,
-        source: Optional[str] = None,
+        type: str | MemoryType | None = None,  # noqa: A002
+        importance: float | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+        source: str | None = None,
     ) -> Memory:
         """Store a new memory (sync).
 
@@ -133,16 +134,16 @@ class AgentVault:
     async def aremember(
         self,
         content: str,
-        type: Optional[str | MemoryType] = None,
-        importance: Optional[float] = None,
-        tags: Optional[list[str]] = None,
-        metadata: Optional[dict[str, Any]] = None,
-        source: Optional[str] = None,
+        type: str | MemoryType | None = None,  # noqa: A002
+        importance: float | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+        source: str | None = None,
     ) -> Memory:
         """Store a new memory (async)."""
         await self._ensure_initialized()
 
-        memory_type: Optional[MemoryType] = None
+        memory_type: MemoryType | None = None
         if isinstance(type, str):
             memory_type = MemoryType(type)
         elif isinstance(type, MemoryType):
@@ -161,10 +162,10 @@ class AgentVault:
     def remember_episode(
         self,
         event: str,
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
         importance: float = 0.5,
-        tags: Optional[list[str]] = None,
-        source: Optional[str] = None,
+        tags: list[str] | None = None,
+        source: str | None = None,
     ) -> Memory:
         """Store an episodic memory (sync).
 
@@ -185,10 +186,10 @@ class AgentVault:
     async def aremember_episode(
         self,
         event: str,
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
         importance: float = 0.5,
-        tags: Optional[list[str]] = None,
-        source: Optional[str] = None,
+        tags: list[str] | None = None,
+        source: str | None = None,
     ) -> Memory:
         """Store an episodic memory (async)."""
         await self._ensure_initialized()
@@ -205,10 +206,10 @@ class AgentVault:
         self,
         name: str,
         steps: list[str],
-        content: Optional[str] = None,
-        learned_from: Optional[str] = None,
+        content: str | None = None,
+        learned_from: str | None = None,
         importance: float = 0.6,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> Memory:
         """Store a procedural memory (sync).
 
@@ -231,10 +232,10 @@ class AgentVault:
         self,
         name: str,
         steps: list[str],
-        content: Optional[str] = None,
-        learned_from: Optional[str] = None,
+        content: str | None = None,
+        learned_from: str | None = None,
         importance: float = 0.6,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> Memory:
         """Store a procedural memory (async)."""
         await self._ensure_initialized()
@@ -254,9 +255,9 @@ class AgentVault:
         self,
         query: str,
         top_k: int = 10,
-        types: Optional[list[str]] = None,
+        types: list[str] | None = None,
         min_importance: float = 0.0,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> RecallResult:
         """Recall relevant memories (sync).
 
@@ -278,14 +279,14 @@ class AgentVault:
         self,
         query: str,
         top_k: int = 10,
-        types: Optional[list[str]] = None,
+        types: list[str] | None = None,
         min_importance: float = 0.0,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> RecallResult:
         """Recall relevant memories (async)."""
         await self._ensure_initialized()
 
-        memory_types: Optional[list[MemoryType]] = None
+        memory_types: list[MemoryType] | None = None
         if types:
             memory_types = [MemoryType(t) for t in types]
 
@@ -302,8 +303,8 @@ class AgentVault:
 
     def forget(
         self,
-        older_than: Optional[str] = None,
-        importance_below: Optional[float] = None,
+        older_than: str | None = None,
+        importance_below: float | None = None,
     ) -> int:
         """Forget memories matching criteria (sync).
 
@@ -320,8 +321,8 @@ class AgentVault:
 
     async def aforget(
         self,
-        older_than: Optional[str] = None,
-        importance_below: Optional[float] = None,
+        older_than: str | None = None,
+        importance_below: float | None = None,
     ) -> int:
         """Forget memories matching criteria (async)."""
         await self._ensure_initialized()
@@ -377,21 +378,21 @@ class AgentVault:
 
     # --- Utilities ---
 
-    def count(self, memory_type: Optional[str] = None) -> int:
+    def count(self, memory_type: str | None = None) -> int:
         """Count memories (sync)."""
         return _run_async(self.acount(memory_type))
 
-    async def acount(self, memory_type: Optional[str] = None) -> int:
+    async def acount(self, memory_type: str | None = None) -> int:
         """Count memories (async)."""
         await self._ensure_initialized()
         mt = MemoryType(memory_type) if memory_type else None
         return await self._manager.count(self.agent_id, mt)
 
-    def get(self, memory_id: str) -> Optional[Memory]:
+    def get(self, memory_id: str) -> Memory | None:
         """Get a memory by ID (sync)."""
         return _run_async(self.aget(memory_id))
 
-    async def aget(self, memory_id: str) -> Optional[Memory]:
+    async def aget(self, memory_id: str) -> Memory | None:
         """Get a memory by ID (async)."""
         await self._ensure_initialized()
         return await self._manager.get_memory(memory_id)

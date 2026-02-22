@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Optional
 
 from agentvault.core.types import Memory, MemoryQuery, MemoryType, RecallResult
 from agentvault.storage.structured_store import SQLiteStructuredStore
@@ -23,12 +22,12 @@ class HybridStore:
 
     def __init__(
         self,
-        vector_store: Optional[FAISSVectorStore] = None,
-        structured_store: Optional[SQLiteStructuredStore] = None,
-        db_path: Optional[str] = None,
-        faiss_path: Optional[str] = None,
+        vector_store: FAISSVectorStore | None = None,
+        structured_store: SQLiteStructuredStore | None = None,
+        db_path: str | None = None,
+        faiss_path: str | None = None,
         # Backwards compatibility alias
-        chroma_path: Optional[str] = None,
+        chroma_path: str | None = None,
     ) -> None:
         persist_path = faiss_path or chroma_path
         self.vector_store = vector_store or FAISSVectorStore(persist_directory=persist_path)
@@ -68,7 +67,7 @@ class HybridStore:
     async def recall(
         self,
         query: MemoryQuery,
-        query_embedding: Optional[list[float]] = None,
+        query_embedding: list[float] | None = None,
     ) -> RecallResult:
         """Recall memories using hybrid search (vector + structured).
 
@@ -135,7 +134,7 @@ class HybridStore:
             query_time_ms=round(elapsed_ms, 2),
         )
 
-    async def get_memory(self, memory_id: str) -> Optional[Memory]:
+    async def get_memory(self, memory_id: str) -> Memory | None:
         """Retrieve a single memory by ID."""
         self._ensure_initialized()
         return await self.structured_store.get_memory(memory_id)
@@ -143,8 +142,8 @@ class HybridStore:
     async def get_memories(
         self,
         agent_id: str,
-        memory_type: Optional[MemoryType] = None,
-        tags: Optional[list[str]] = None,
+        memory_type: MemoryType | None = None,
+        tags: list[str] | None = None,
         min_importance: float = 0.0,
         limit: int = 100,
     ) -> list[Memory]:
@@ -180,8 +179,8 @@ class HybridStore:
     async def forget(
         self,
         agent_id: str,
-        older_than: Optional[str] = None,
-        importance_below: Optional[float] = None,
+        older_than: str | None = None,
+        importance_below: float | None = None,
     ) -> int:
         """Delete memories matching forget criteria."""
         self._ensure_initialized()
@@ -210,7 +209,7 @@ class HybridStore:
     async def count(
         self,
         agent_id: str,
-        memory_type: Optional[MemoryType] = None,
+        memory_type: MemoryType | None = None,
     ) -> int:
         """Count memories."""
         self._ensure_initialized()

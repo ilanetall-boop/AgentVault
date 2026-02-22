@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import Optional
 
 # Fix Windows console encoding for Unicode characters
 if sys.platform == "win32":
@@ -26,8 +25,8 @@ console = Console()
 def serve(
     host: str = typer.Option("0.0.0.0", help="Host to bind to"),
     port: int = typer.Option(8000, help="Port to listen on"),
-    db_path: Optional[str] = typer.Option(None, help="SQLite database path"),
-    faiss_path: Optional[str] = typer.Option(None, help="FAISS storage path"),
+    db_path: str | None = typer.Option(None, help="SQLite database path"),
+    faiss_path: str | None = typer.Option(None, help="FAISS storage path"),
 ) -> None:
     """Start the AgentVault API server."""
     console.print(f"[bold green]Starting AgentVault API on {host}:{port}[/bold green]")
@@ -39,8 +38,8 @@ def serve(
 @app.command()
 def stats(
     agent_id: str = typer.Argument(help="Agent ID to show stats for"),
-    db_path: Optional[str] = typer.Option(None, help="SQLite database path"),
-    faiss_path: Optional[str] = typer.Option(None, help="FAISS storage path"),
+    db_path: str | None = typer.Option(None, help="SQLite database path"),
+    faiss_path: str | None = typer.Option(None, help="FAISS storage path"),
 ) -> None:
     """Show memory statistics for an agent."""
 
@@ -76,8 +75,8 @@ def recall(
     agent_id: str = typer.Argument(help="Agent ID"),
     query: str = typer.Argument(help="Search query"),
     top_k: int = typer.Option(10, help="Maximum results"),
-    db_path: Optional[str] = typer.Option(None, help="SQLite database path"),
-    faiss_path: Optional[str] = typer.Option(None, help="FAISS storage path"),
+    db_path: str | None = typer.Option(None, help="SQLite database path"),
+    faiss_path: str | None = typer.Option(None, help="FAISS storage path"),
 ) -> None:
     """Search memories for an agent."""
 
@@ -98,7 +97,7 @@ def recall(
             table.add_column("Content", style="white")
             table.add_column("Importance", style="magenta", justify="right")
 
-            for memory, score in zip(result.memories, result.relevance_scores):
+            for memory, score in zip(result.memories, result.relevance_scores, strict=False):
                 table.add_row(
                     f"{score:.3f}",
                     memory.type.value,
@@ -117,8 +116,8 @@ def recall(
 @app.command()
 def consolidate(
     agent_id: str = typer.Argument(help="Agent ID"),
-    db_path: Optional[str] = typer.Option(None, help="SQLite database path"),
-    faiss_path: Optional[str] = typer.Option(None, help="FAISS storage path"),
+    db_path: str | None = typer.Option(None, help="SQLite database path"),
+    faiss_path: str | None = typer.Option(None, help="FAISS storage path"),
 ) -> None:
     """Run memory consolidation for an agent."""
 

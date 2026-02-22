@@ -6,7 +6,6 @@ import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 from sqlalchemy import (
     Column,
@@ -16,7 +15,6 @@ from sqlalchemy import (
     String,
     Text,
     and_,
-    create_engine,
     delete,
     select,
 )
@@ -144,7 +142,7 @@ class SQLiteStructuredStore:
     Uses SQLite for local/development and can be swapped for PostgreSQL.
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         self._db_path = db_path or str(
             Path.home() / ".agentvault" / "memories.db"
         )
@@ -177,7 +175,7 @@ class SQLiteStructuredStore:
             await session.commit()
         logger.debug("Saved memory %s", memory.id)
 
-    async def get_memory(self, memory_id: str) -> Optional[Memory]:
+    async def get_memory(self, memory_id: str) -> Memory | None:
         """Retrieve a single memory by ID."""
         async with self._get_session() as session:
             result = await session.execute(
@@ -191,8 +189,8 @@ class SQLiteStructuredStore:
     async def get_memories(
         self,
         agent_id: str,
-        memory_type: Optional[MemoryType] = None,
-        tags: Optional[list[str]] = None,
+        memory_type: MemoryType | None = None,
+        tags: list[str] | None = None,
         min_importance: float = 0.0,
         limit: int = 100,
         offset: int = 0,
@@ -234,8 +232,8 @@ class SQLiteStructuredStore:
     async def delete_memories(
         self,
         agent_id: str,
-        older_than: Optional[str] = None,
-        importance_below: Optional[float] = None,
+        older_than: str | None = None,
+        importance_below: float | None = None,
     ) -> int:
         """Delete memories matching criteria. Returns count deleted."""
         async with self._get_session() as session:
@@ -255,7 +253,7 @@ class SQLiteStructuredStore:
     async def count_memories(
         self,
         agent_id: str,
-        memory_type: Optional[MemoryType] = None,
+        memory_type: MemoryType | None = None,
     ) -> int:
         """Count memories matching criteria."""
         async with self._get_session() as session:

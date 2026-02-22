@@ -311,10 +311,14 @@ def format_context_block(analysis: dict) -> str:
     s = analysis["stack"]
     if s["languages"] or s["frameworks"]:
         lines.append("STACK:")
-        if s["languages"]: lines.append(f"- Languages: {', '.join(s['languages'])}")
-        if s["frameworks"]: lines.append(f"- Frameworks: {', '.join(s['frameworks'])}")
-        if s["tools"]: lines.append(f"- Tools: {', '.join(s['tools'])}")
-        if s["infra"]: lines.append(f"- Infra: {', '.join(s['infra'])}")
+        if s["languages"]:
+            lines.append(f"- Languages: {', '.join(s['languages'])}")
+        if s["frameworks"]:
+            lines.append(f"- Frameworks: {', '.join(s['frameworks'])}")
+        if s["tools"]:
+            lines.append(f"- Tools: {', '.join(s['tools'])}")
+        if s["infra"]:
+            lines.append(f"- Infra: {', '.join(s['infra'])}")
         lines.append("")
 
     a = analysis["architecture"]
@@ -329,9 +333,12 @@ def format_context_block(analysis: dict) -> str:
     c = analysis["conventions"]
     if c["linting"] or c["formatting"] or c["naming"] != "unknown":
         lines.append("CONVENTIONS:")
-        if c["naming"] != "unknown": lines.append(f"- Naming: {c['naming']}")
-        if c["linting"]: lines.append(f"- Linting: {', '.join(c['linting'].keys())}")
-        if c["formatting"]: lines.append(f"- Formatting: {', '.join(c['formatting'].keys())}")
+        if c["naming"] != "unknown":
+            lines.append(f"- Naming: {c['naming']}")
+        if c["linting"]:
+            lines.append(f"- Linting: {', '.join(c['linting'].keys())}")
+        if c["formatting"]:
+            lines.append(f"- Formatting: {', '.join(c['formatting'].keys())}")
         lines.append("")
 
     lines.append("================================")
@@ -353,25 +360,29 @@ def test_project(name: str, root: str) -> bool:
     # Assertions
     ok = True
 
+    arch = analysis["architecture"]["structure"]
+
     if name == "Node.js/React":
+        n_dirs = len(arch)
         checks = [
             ("JavaScript/TypeScript" in analysis["stack"]["languages"], "Should detect JS/TS"),
             ("React" in analysis["stack"]["frameworks"], "Should detect React"),
             ("Next.js" in analysis["stack"]["frameworks"], "Should detect Next.js"),
-            (any("component" in k.lower() for k in analysis["architecture"]["structure"]), "Should find components/"),
-            (any("service" in k.lower() for k in analysis["architecture"]["structure"]), "Should find services/"),
-            (len(analysis["architecture"]["structure"]) >= 5, f"Should have >=5 dirs (got {len(analysis['architecture']['structure'])})"),
+            (any("component" in k.lower() for k in arch), "Should find components/"),
+            (any("service" in k.lower() for k in arch), "Should find services/"),
+            (n_dirs >= 5, f"Should have >=5 dirs (got {n_dirs})"),
             ("eslint" in analysis["conventions"]["linting"], "Should detect ESLint"),
             ("prettier" in analysis["conventions"]["formatting"], "Should detect Prettier"),
         ]
     elif name == "Python/Django":
+        n_dirs = len(arch)
         checks = [
             ("Python" in analysis["stack"]["languages"], "Should detect Python"),
             ("Django" in analysis["stack"]["frameworks"], "Should detect Django"),
             ("Docker" in analysis["stack"]["infra"], "Should detect Docker"),
-            (any("model" in k.lower() for k in analysis["architecture"]["structure"]), "Should find models/"),
-            (any("view" in k.lower() for k in analysis["architecture"]["structure"]), "Should find views/"),
-            (len(analysis["architecture"]["structure"]) >= 4, f"Should have >=4 dirs (got {len(analysis['architecture']['structure'])})"),
+            (any("model" in k.lower() for k in arch), "Should find models/"),
+            (any("view" in k.lower() for k in arch), "Should find views/"),
+            (n_dirs >= 4, f"Should have >=4 dirs (got {n_dirs})"),
             ("ruff" in analysis["conventions"]["linting"], "Should detect Ruff"),
             ("mypy" in analysis["conventions"]["linting"], "Should detect mypy"),
             ("editorconfig" in analysis["conventions"]["formatting"], "Should detect EditorConfig"),
@@ -422,7 +433,10 @@ if __name__ == "__main__":
         # Summary
         print(f"\n{'='*60}")
         all_ok = all([ok1, ok2, ok3, ok4])
-        results = [("Node.js/React", ok1), ("Python/Django", ok2), ("Empty", ok3), ("AgentVault", ok4)]
+        results = [
+            ("Node.js/React", ok1), ("Python/Django", ok2),
+            ("Empty", ok3), ("AgentVault", ok4),
+        ]
         for name, ok in results:
             print(f"  {'PASS' if ok else 'FAIL'} — {name}")
         print(f"{'='*60}")

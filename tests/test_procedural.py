@@ -1,6 +1,5 @@
 """Tests for procedural memory."""
 
-import pytest
 
 from agentvault.core.procedural import ProceduralMemoryManager
 from agentvault.core.types import MemoryType, ProceduralMemory

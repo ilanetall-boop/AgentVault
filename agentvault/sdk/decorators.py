@@ -10,18 +10,17 @@ import asyncio
 import functools
 import inspect
 import logging
-from typing import Any, Callable, Optional
-
-from agentvault.core.types import MemoryType
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 def auto_remember(
     vault: Any,
-    memory_type: Optional[str] = None,
-    importance: Optional[float] = None,
-    tags: Optional[list[str]] = None,
+    memory_type: str | None = None,
+    importance: float | None = None,
+    tags: list[str] | None = None,
 ) -> Callable:
     """Decorator that automatically stores function input/output as memories.
 
@@ -193,7 +192,7 @@ def _extract_query(
     args: tuple,
     kwargs: dict,
     query_param: str,
-) -> Optional[str]:
+) -> str | None:
     """Extract the query value from function arguments."""
     if query_param in kwargs:
         val = kwargs[query_param]

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
-from agentvault.core.types import Memory, MemoryType, SemanticMemory
+from agentvault.core.types import SemanticMemory
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +22,13 @@ class SemanticMemoryManager:
         self,
         agent_id: str,
         content: str,
-        subject: Optional[str] = None,
-        predicate: Optional[str] = None,
-        obj: Optional[str] = None,
+        subject: str | None = None,
+        predicate: str | None = None,
+        obj: str | None = None,
         confidence: float = 1.0,
         importance: float = 0.5,
-        tags: Optional[list[str]] = None,
-        source: Optional[str] = None,
+        tags: list[str] | None = None,
+        source: str | None = None,
     ) -> SemanticMemory:
         """Create a new semantic memory.
 
@@ -68,7 +68,7 @@ class SemanticMemoryManager:
         obj: str,
         confidence: float = 1.0,
         importance: float = 0.5,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> SemanticMemory:
         """Create a semantic memory from a knowledge triple.
 
@@ -170,9 +170,7 @@ class SemanticMemoryManager:
         Returns:
             The winning memory with updated metadata.
         """
-        if memory_b.confidence > memory_a.confidence:
-            winner = memory_b
-        elif memory_b.created_at > memory_a.created_at:
+        if memory_b.confidence > memory_a.confidence or memory_b.created_at > memory_a.created_at:
             winner = memory_b
         else:
             winner = memory_a

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from fastapi import APIRouter
 
 from agentvault.api.dependencies import get_manager
@@ -23,7 +21,7 @@ async def list_agents() -> dict:
 @router.get("/agents/{agent_id}/memories")
 async def list_agent_memories(
     agent_id: str,
-    type: Optional[str] = None,
+    type: str | None = None,  # noqa: A002
     min_importance: float = 0.0,
     limit: int = 100,
 ) -> dict:
@@ -95,8 +93,8 @@ async def consolidate_agent(agent_id: str) -> dict:
 @router.delete("/agents/{agent_id}/memories")
 async def forget_agent_memories(
     agent_id: str,
-    older_than: Optional[str] = None,
-    importance_below: Optional[float] = None,
+    older_than: str | None = None,
+    importance_below: float | None = None,
 ) -> dict:
     """Forget (delete) memories matching criteria."""
     manager = get_manager()

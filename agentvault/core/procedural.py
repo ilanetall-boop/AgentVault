@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from agentvault.core.types import ProceduralMemory
 
@@ -22,12 +22,12 @@ class ProceduralMemoryManager:
         self,
         agent_id: str,
         content: str,
-        name: Optional[str] = None,
-        steps: Optional[list[str]] = None,
-        learned_from: Optional[str] = None,
+        name: str | None = None,
+        steps: list[str] | None = None,
+        learned_from: str | None = None,
         importance: float = 0.5,
-        tags: Optional[list[str]] = None,
-        source: Optional[str] = None,
+        tags: list[str] | None = None,
+        source: str | None = None,
     ) -> ProceduralMemory:
         """Create a new procedural memory.
 

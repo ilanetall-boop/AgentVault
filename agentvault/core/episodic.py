@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from agentvault.core.types import EpisodicMemory, Memory, MemoryType
 
@@ -22,12 +22,12 @@ class EpisodicMemoryManager:
         self,
         agent_id: str,
         content: str,
-        event: Optional[str] = None,
-        context: Optional[dict[str, Any]] = None,
+        event: str | None = None,
+        context: dict[str, Any] | None = None,
         importance: float = 0.5,
-        tags: Optional[list[str]] = None,
-        source: Optional[str] = None,
-        participants: Optional[list[str]] = None,
+        tags: list[str] | None = None,
+        source: str | None = None,
+        participants: list[str] | None = None,
     ) -> EpisodicMemory:
         """Create a new episodic memory.
 

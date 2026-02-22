@@ -4,7 +4,6 @@ import pytest
 
 from agentvault.core.types import MemoryType
 from agentvault.multi_agent.permissions import PermissionManager
-from agentvault.multi_agent.shared_memory import SharedMemoryManager
 
 
 class TestMultiAgent:
@@ -14,7 +13,7 @@ class TestMultiAgent:
     async def test_agent_a_writes_agent_b_reads_shared(self, memory_manager):
         """Test that Agent A can write and Agent B can read shared memories."""
         # Agent A stores a shared memory
-        memory = await memory_manager.remember(
+        await memory_manager.remember(
             agent_id="agent-a",
             content="Important shared fact about the project",
             memory_type=MemoryType.SEMANTIC,

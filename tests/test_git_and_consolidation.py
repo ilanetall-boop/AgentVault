@@ -4,7 +4,6 @@ Runs against the live AgentVault backend (localhost:8420).
 """
 
 import asyncio
-import json
 import os
 import subprocess
 import sys
@@ -46,13 +45,15 @@ async def test_git_capture():
 
         # Read HEAD to verify the commit
         head_path = os.path.join(tmpdir, ".git", "HEAD")
-        head_content = open(head_path).read().strip()
+        with open(head_path) as fh:
+            head_content = fh.read().strip()
         print(f"  .git/HEAD: {head_content}")
 
         # Read the ref to get commit hash
         if head_content.startswith("ref:"):
             ref_path = os.path.join(tmpdir, ".git", head_content.split(" ")[1])
-            commit_hash = open(ref_path).read().strip()[:8]
+            with open(ref_path) as fh:
+                commit_hash = fh.read().strip()[:8]
         else:
             commit_hash = head_content[:8]
 
@@ -75,7 +76,7 @@ async def test_git_capture():
         # Store like gitCapture does
         memory = await manager.remember(
             agent_id=AGENT_ID,
-            content=f"Committed: feat: initial commit with hello.py",
+            content="Committed: feat: initial commit with hello.py",
             memory_type=MemoryType.EPISODIC,
             importance=0.7,
             tags=["git", "commit"],
@@ -102,7 +103,8 @@ async def test_git_capture():
 
         print(f"  Recall found: {result.total_found} memories")
         for i, mem in enumerate(result.memories):
-            print(f"    [{mem.type.value}] {mem.content[:60]}... (score: {result.relevance_scores[i]:.3f})")
+            score = result.relevance_scores[i]
+            print(f"    [{mem.type.value}] {mem.content[:60]}... (score: {score:.3f})")
 
         await manager.close()
 
@@ -153,7 +155,7 @@ async def test_consolidation():
             "API development framework: FastAPI",
         ]
 
-        for i, content in enumerate(variations):
+        for _i, content in enumerate(variations):
             await manager.remember(
                 agent_id=AGENT_ID,
                 content=content,
@@ -189,8 +191,13 @@ async def test_consolidation():
         )
         print(f"\n  Recall after consolidation: {recall_result.total_found} found")
         for i, mem in enumerate(recall_result.memories):
-            score = recall_result.relevance_scores[i] if i < len(recall_result.relevance_scores) else 0
-            print(f"    [{mem.type.value}] {mem.content[:70]}... (imp: {mem.importance:.2f}, score: {score:.3f})")
+            scores = recall_result.relevance_scores
+            score = scores[i] if i < len(scores) else 0
+            content = mem.content[:70]
+            print(
+                f"    [{mem.type.value}] {content}..."
+                f" (imp: {mem.importance:.2f}, score: {score:.3f})"
+            )
 
         await manager.close()
 
@@ -202,13 +209,27 @@ async def test_consolidation():
         ran_ok = result.total_processed == 20  # All 20 were processed
 
         if reduced:
-            print(f"\n  [PASS] Count reduced: {count_before} -> {count_after} (merged {result.merged})")
+            print(
+                f"\n  [PASS] Count reduced: {count_before} -> {count_after}"
+                f" (merged {result.merged})"
+            )
         else:
-            print(f"\n  [INFO] Count unchanged: {count_before} -> {count_after} (similarity threshold=0.85 not met)")
-            print(f"         This is expected with local embeddings on paraphrased text.")
+            print(
+                f"\n  [INFO] Count unchanged: {count_before} -> {count_after}"
+                " (similarity threshold=0.85 not met)"
+            )
+            print(
+                "         This is expected with local embeddings"
+                " on paraphrased text."
+            )
 
-        print(f"  [{'PASS' if ran_ok else 'FAIL'}] Consolidation processed all {result.total_processed} memories")
-        print(f"  [{'PASS' if has_results else 'FAIL'}] Recall still works after consolidation")
+        status = "PASS" if ran_ok else "FAIL"
+        print(
+            f"  [{status}] Consolidation processed"
+            f" all {result.total_processed} memories"
+        )
+        status = "PASS" if has_results else "FAIL"
+        print(f"  [{status}] Recall still works after consolidation")
         return ran_ok and has_results
 
     finally:

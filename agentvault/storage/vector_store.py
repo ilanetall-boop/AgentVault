@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import faiss
 import numpy as np
@@ -24,7 +24,7 @@ class FAISSVectorStore(BaseVectorStore):
 
     def __init__(
         self,
-        persist_directory: Optional[str] = None,
+        persist_directory: str | None = None,
         collection_name: str = "agentvault_memories",
         dimension: int = 384,
     ) -> None:
@@ -33,7 +33,7 @@ class FAISSVectorStore(BaseVectorStore):
         )
         self._collection_name = collection_name
         self._dimension = dimension
-        self._index: Optional[faiss.IndexFlatIP] = None
+        self._index: faiss.IndexFlatIP | None = None
         self._id_to_idx: dict[str, int] = {}
         self._idx_to_id: dict[int, str] = {}
         self._metadata: dict[str, dict[str, Any]] = {}
@@ -54,7 +54,7 @@ class FAISSVectorStore(BaseVectorStore):
 
         if index_file.exists() and meta_file.exists():
             self._index = faiss.read_index(str(index_file))
-            with open(meta_file, "r", encoding="utf-8") as f:
+            with open(meta_file, encoding="utf-8") as f:
                 data = json.load(f)
                 self._id_to_idx = data.get("id_to_idx", {})
                 self._idx_to_id = {int(k): v for k, v in data.get("idx_to_id", {}).items()}
@@ -130,7 +130,7 @@ class FAISSVectorStore(BaseVectorStore):
         self,
         query_embedding: list[float],
         top_k: int = 10,
-        filters: Optional[dict] = None,
+        filters: dict | None = None,
     ) -> list[tuple[str, float]]:
         """Search for similar vectors using cosine similarity."""
         index = self._ensure_index()
@@ -147,7 +147,7 @@ class FAISSVectorStore(BaseVectorStore):
         scores, indices = index.search(query_vec, search_k)
 
         results: list[tuple[str, float]] = []
-        for score, idx in zip(scores[0], indices[0]):
+        for score, idx in zip(scores[0], indices[0], strict=False):
             if idx < 0:
                 continue
             memory_id = self._idx_to_id.get(idx)

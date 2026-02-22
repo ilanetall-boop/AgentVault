@@ -2,8 +2,6 @@
 
 from datetime import datetime, timedelta
 
-import pytest
-
 from agentvault.core.episodic import EpisodicMemoryManager
 from agentvault.core.types import EpisodicMemory, MemoryType
 

@@ -2,22 +2,22 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from agentvault.core.memory_manager import MemoryManager
 
 # Global memory manager instance
-_manager: Optional["MemoryManager"] = None
+_manager: MemoryManager | None = None
 
 
-def set_manager(manager: "MemoryManager") -> None:
+def set_manager(manager: MemoryManager) -> None:
     """Set the global MemoryManager instance."""
     global _manager
     _manager = manager
 
 
-def get_manager() -> "MemoryManager":
+def get_manager() -> MemoryManager:
     """Get the global MemoryManager instance."""
     if _manager is None:
         raise RuntimeError("MemoryManager not initialized")

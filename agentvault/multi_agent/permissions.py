@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from agentvault.core.types import AgentPermission
 
@@ -103,7 +102,7 @@ class PermissionManager:
         self,
         namespace_id: str,
         agent_id: str,
-    ) -> Optional[AgentPermission]:
+    ) -> AgentPermission | None:
         """Get the current permission level for an agent.
 
         Args:
