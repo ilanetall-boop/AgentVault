@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from agentvault.api.dependencies import get_manager
 from agentvault.core.types import MemoryType
@@ -14,7 +14,7 @@ router = APIRouter()
 async def list_agents() -> dict:
     """List all agents that have stored memories."""
     manager = get_manager()
-    agents = await manager._store.list_agents()
+    agents = await manager.list_agents()
     return {"agents": agents}
 
 
@@ -28,8 +28,12 @@ async def list_agent_memories(
     """List all memories for an agent."""
     manager = get_manager()
 
-    memory_type = MemoryType(type) if type else None
-    memories = await manager._store.get_memories(
+    try:
+        memory_type = MemoryType(type) if type else None
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Invalid memory type: {type}")
+
+    memories = await manager.get_memories(
         agent_id=agent_id,
         memory_type=memory_type,
         min_importance=min_importance,

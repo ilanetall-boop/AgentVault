@@ -111,17 +111,17 @@ class FAISSVectorStore(BaseVectorStore):
         faiss.normalize_L2(vec)
 
         if memory_id in self._id_to_idx:
-            # Update existing: we can't update in-place in IndexFlatIP,
-            # so we just update metadata and keep the old vector position
-            # For a proper update, we'd need to rebuild the index
-            self._metadata[memory_id] = safe_metadata
-        else:
-            idx = self._next_idx
-            self._next_idx += 1
-            index.add(vec)
-            self._id_to_idx[memory_id] = idx
-            self._idx_to_id[idx] = memory_id
-            self._metadata[memory_id] = safe_metadata
+            # Remove old mapping so the orphaned vector is ignored in search
+            old_idx = self._id_to_idx.pop(memory_id)
+            self._idx_to_id.pop(old_idx, None)
+
+        # Add new vector at next index position
+        idx = self._next_idx
+        self._next_idx += 1
+        index.add(vec)
+        self._id_to_idx[memory_id] = idx
+        self._idx_to_id[idx] = memory_id
+        self._metadata[memory_id] = safe_metadata
 
         self._persist()
         logger.debug("Added vector for memory %s", memory_id)

@@ -410,6 +410,32 @@ class MemoryManager:
         self._ensure_initialized()
         return await self._store.count(agent_id, memory_type)
 
+    async def delete_memory(self, memory_id: str) -> None:
+        """Delete a single memory by ID from both stores."""
+        self._ensure_initialized()
+        await self._store.delete(memory_id)
+
+    async def list_agents(self) -> list[dict]:
+        """List all agents with memory counts."""
+        self._ensure_initialized()
+        return await self._store.structured_store.list_agents()
+
+    async def get_memories(
+        self,
+        agent_id: str,
+        memory_type: MemoryType | None = None,
+        min_importance: float = 0.0,
+        limit: int = 100,
+    ) -> list[Memory]:
+        """Get memories for an agent with optional filters."""
+        self._ensure_initialized()
+        return await self._store.get_memories(
+            agent_id=agent_id,
+            memory_type=memory_type,
+            min_importance=min_importance,
+            limit=limit,
+        )
+
     async def close(self) -> None:
         """Close all resources."""
         await self._store.close()

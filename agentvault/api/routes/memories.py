@@ -97,5 +97,5 @@ async def delete_memory(memory_id: str) -> Response:
     memory = await manager.get_memory(memory_id)
     if memory is None:
         raise HTTPException(status_code=404, detail="Memory not found")
-    await manager._store.delete(memory_id)
+    await manager.delete_memory(memory_id)
     return Response(status_code=204)

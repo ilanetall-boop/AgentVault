@@ -182,23 +182,40 @@ class HybridStore:
         older_than: str | None = None,
         importance_below: float | None = None,
     ) -> int:
-        """Delete memories matching forget criteria."""
+        """Delete memories matching forget criteria from both stores atomically."""
         self._ensure_initialized()
+
+        # Get all candidate memories
         memories = await self.structured_store.get_memories(
             agent_id=agent_id, min_importance=0.0, limit=10000
         )
+
+        # Apply the SAME criteria as structured store to find IDs to delete
+        from datetime import datetime, timedelta
+        from agentvault.storage.structured_store import _parse_duration
+
+        cutoff = None
+        if older_than:
+            cutoff = datetime.utcnow() - _parse_duration(older_than)
+
         to_delete = []
         for m in memories:
-            if importance_below is not None and m.importance >= importance_below:
-                continue
-            to_delete.append(m.id)
+            passes_importance = importance_below is None or m.importance < importance_below
+            passes_age = cutoff is None or m.created_at < cutoff
+            if passes_importance and passes_age:
+                to_delete.append(m.id)
+
+        # Delete from structured store
         count = await self.structured_store.delete_memories(
             agent_id=agent_id,
             older_than=older_than,
             importance_below=importance_below,
         )
+
+        # Delete matching vectors (same IDs)
         for mid in to_delete:
             await self.vector_store.delete(mid)
+
         return count
 
     async def get_all_memories(self, agent_id: str) -> list[Memory]:

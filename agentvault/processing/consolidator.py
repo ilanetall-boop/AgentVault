@@ -133,9 +133,12 @@ class Consolidator:
     ) -> tuple[list[Memory], int]:
         """Merge memories that are semantically very similar.
 
-        Uses cosine similarity between embeddings to find near-duplicates
-        and merges them into a single enriched memory.
+        Uses batch matrix multiplication per memory type for O(n*k) instead of O(n^2).
+        Groups memories by type, builds an embedding matrix per group,
+        and uses numpy batch cosine similarity to find merge candidates.
         """
+        import numpy as np
+
         if len(memories) < 2:
             return memories, 0
 
@@ -143,43 +146,61 @@ class Consolidator:
         merged_ids: set[str] = set()
         result: list[Memory] = []
 
-        for i, mem_a in enumerate(memories):
-            if mem_a.id in merged_ids:
-                continue
-            if mem_a.embedding is None:
-                result.append(mem_a)
-                continue
+        # Group memories by type for efficient batch comparison
+        type_groups: dict[MemoryType, list[Memory]] = {}
+        no_embedding: list[Memory] = []
 
-            best_match: Memory | None = None
-            best_similarity = 0.0
-
-            for j in range(i + 1, len(memories)):
-                mem_b = memories[j]
-                if mem_b.id in merged_ids or mem_b.embedding is None:
-                    continue
-                if mem_a.type != mem_b.type:
-                    continue
-
-                similarity = self.indexer.cosine_similarity(
-                    mem_a.embedding, mem_b.embedding
-                )
-                if similarity > self.similarity_threshold and similarity > best_similarity:
-                    best_similarity = similarity
-                    best_match = mem_b
-
-            if best_match is not None:
-                merged = self._merge_two(mem_a, best_match)
-                result.append(merged)
-                merged_ids.add(best_match.id)
-                merged_count += 1
-                logger.debug(
-                    "Merged memories %s and %s (similarity=%.3f)",
-                    mem_a.id,
-                    best_match.id,
-                    best_similarity,
-                )
+        for mem in memories:
+            if mem.embedding is None:
+                no_embedding.append(mem)
             else:
-                result.append(mem_a)
+                type_groups.setdefault(mem.type, []).append(mem)
+
+        # Process each type group with batch similarity
+        for mem_type, group in type_groups.items():
+            if len(group) < 2:
+                result.extend(group)
+                continue
+
+            # Build embedding matrix and compute all pairwise similarities at once
+            embeddings = np.array([m.embedding for m in group], dtype=np.float32)
+            norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+            norms = np.maximum(norms, 1e-10)
+            normalized = embeddings / norms
+            # sim_matrix[i][j] = cosine similarity between group[i] and group[j]
+            sim_matrix = normalized @ normalized.T
+
+            for i, mem_a in enumerate(group):
+                if mem_a.id in merged_ids:
+                    continue
+
+                # Find best match from remaining candidates
+                best_j = -1
+                best_sim = 0.0
+                for j in range(i + 1, len(group)):
+                    if group[j].id in merged_ids:
+                        continue
+                    s = float(sim_matrix[i, j])
+                    if s > self.similarity_threshold and s > best_sim:
+                        best_sim = s
+                        best_j = j
+
+                if best_j >= 0:
+                    merged = self._merge_two(mem_a, group[best_j])
+                    result.append(merged)
+                    merged_ids.add(group[best_j].id)
+                    merged_count += 1
+                    logger.debug(
+                        "Merged memories %s and %s (similarity=%.3f)",
+                        mem_a.id,
+                        group[best_j].id,
+                        best_sim,
+                    )
+                else:
+                    result.append(mem_a)
+
+        # Add memories without embeddings unchanged
+        result.extend(no_embedding)
 
         return result, merged_count
 

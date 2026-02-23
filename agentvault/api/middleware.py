@@ -1,8 +1,9 @@
-"""API middleware — CORS, rate limiting, request logging."""
+"""API middleware — CORS, rate limiting, request logging, authentication."""
 
 from __future__ import annotations
 
 import logging
+import os
 import time
 from collections import defaultdict
 
@@ -11,6 +12,37 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)
+
+# API key for optional authentication
+# Set AGENTVAULT_API_KEY env var to enable auth, leave unset for local-only use
+_API_KEY: str | None = os.environ.get("AGENTVAULT_API_KEY")
+
+
+class ApiKeyMiddleware(BaseHTTPMiddleware):
+    """Optional API key authentication via X-API-Key header.
+
+    Only active when AGENTVAULT_API_KEY environment variable is set.
+    Health endpoint is always public.
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        # Health check is always public
+        if request.url.path == "/health":
+            return await call_next(request)
+
+        # Skip auth if no API key configured (local mode)
+        if _API_KEY is None:
+            return await call_next(request)
+
+        provided_key = request.headers.get("X-API-Key", "")
+        if provided_key != _API_KEY:
+            return Response(
+                content='{"detail":"Invalid or missing API key"}',
+                status_code=401,
+                media_type="application/json",
+            )
+
+        return await call_next(request)
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -65,12 +97,18 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 def setup_middleware(app: FastAPI) -> None:
     """Configure all middleware for the application."""
+    # CORS: configurable origins, default to localhost only
+    allowed_origins = os.environ.get(
+        "AGENTVAULT_CORS_ORIGINS", "http://localhost:8420"
+    ).split(",")
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=allowed_origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "DELETE"],
+        allow_headers=["Content-Type", "X-API-Key"],
     )
+    app.add_middleware(ApiKeyMiddleware)
     app.add_middleware(RequestLoggingMiddleware)
     app.add_middleware(RateLimitMiddleware, max_requests=200, window_seconds=60)
