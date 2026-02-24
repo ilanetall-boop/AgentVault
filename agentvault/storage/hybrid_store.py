@@ -191,7 +191,8 @@ class HybridStore:
         )
 
         # Apply the SAME criteria as structured store to find IDs to delete
-        from datetime import datetime, timedelta
+        from datetime import datetime
+
         from agentvault.storage.structured_store import _parse_duration
 
         cutoff = None

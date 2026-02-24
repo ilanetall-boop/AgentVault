@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import pytest
 
 from agentvault.core.types import Memory, MemoryType
-from agentvault.processing.ranker import Ranker
 
 
 def _mem(
@@ -141,7 +140,6 @@ class TestAdjustWeights:
         assert abs(total - 1.0) < 0.001
 
     def test_partial_adjustment(self, ranker):
-        original_rec = ranker.recency_weight
         ranker.adjust_weights(similarity_weight=0.8)
         # Weights should still sum to 1.0
         total = (

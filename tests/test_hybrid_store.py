@@ -1,7 +1,7 @@
 """Tests for HybridStore — especially the fixed forget() method."""
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pytest
 import pytest_asyncio

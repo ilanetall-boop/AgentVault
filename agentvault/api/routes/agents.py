@@ -31,7 +31,7 @@ async def list_agent_memories(
     try:
         memory_type = MemoryType(type) if type else None
     except ValueError:
-        raise HTTPException(status_code=422, detail=f"Invalid memory type: {type}")
+        raise HTTPException(status_code=422, detail=f"Invalid memory type: {type}") from None
 
     memories = await manager.get_memories(
         agent_id=agent_id,

@@ -1,7 +1,6 @@
 """Tests for the Indexer — embedding, text preparation, cosine similarity."""
 
 import pytest
-import pytest_asyncio
 
 from agentvault.core.types import Memory, MemoryType
 from agentvault.processing.indexer import Indexer

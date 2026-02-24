@@ -1,7 +1,6 @@
 """Tests for the Extractor — type classification, fact/step extraction, importance."""
 
 from agentvault.core.types import MemoryType
-from agentvault.processing.extractor import Extractor
 
 
 class TestClassifyMemoryType:

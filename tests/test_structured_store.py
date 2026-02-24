@@ -1,13 +1,11 @@
 """Tests for the SQLite structured store — duration parsing, CRUD, filtering."""
 
-import os
 from datetime import timedelta
 
 import pytest
-import pytest_asyncio
 
 from agentvault.core.types import Memory, MemoryType
-from agentvault.storage.structured_store import SQLiteStructuredStore, _parse_duration
+from agentvault.storage.structured_store import _parse_duration
 
 
 class TestParseDuration:

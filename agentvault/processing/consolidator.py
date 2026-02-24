@@ -157,7 +157,7 @@ class Consolidator:
                 type_groups.setdefault(mem.type, []).append(mem)
 
         # Process each type group with batch similarity
-        for mem_type, group in type_groups.items():
+        for _mem_type, group in type_groups.items():
             if len(group) < 2:
                 result.extend(group)
                 continue
